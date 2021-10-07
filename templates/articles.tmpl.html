@@ -1,0 +1,15 @@
+<div class="col-lg-6">
+    <!-- Article post-->
+    <div class="card mb-4">
+        {{if .articleImage}}
+        <a href="{{.articleUrl}}"><img class="card-img-top" src="{{.articleImage}}" alt="Image failed to download." /></a>
+        {{end}}
+        <div class="card-body">
+            <div class="small text-muted">{{.articlePubDate}}</div>
+            <h1 class="card-title text-muted h5">{{.articleSource}}</h1>
+            <h2 class="card-title h4">{{.articleTitle}}</h2>
+            <p class="card-text">{{.articleDescription}}</p>
+            <a class="btn btn-primary" href="{{.articleUrl}}" target="_blank">Read more →</a>
+        </div>
+    </div>
+</div>

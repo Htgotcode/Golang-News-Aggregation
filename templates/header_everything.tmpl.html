@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>{{.title}}</title>
+        <link rel="icon" type="image/x-icon" href="/favicon-16x16.ico">
+        <link href="/css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Header -->
+        <header class="py-5 bg-light border-bottom mb-4">
+            <div class="container">
+                <div class="text-center my-5">
+                    {{if .query}}
+                    <h1 class="fw-bolder">All the articles on {{.query}}</h1>
+                    <p class="lead mb-0">Or search for another topic below.</p>
+                    {{else}}
+                    <h1 class="fw-bolder">Search for a topic below.</h1>
+                    {{end}}
+                </div>
+            </div>
+            <div class = "container text-center">
+            <form action="/everything" method="GET">
+                <input
+                  autofocus
+                  value="{{.query}}"
+                  placeholder="Enter a news topic"
+                  type="text"
+                  name="q"
+                />
+            </form>
+            </div> 
+        </header>
+    </body>
+</html>
