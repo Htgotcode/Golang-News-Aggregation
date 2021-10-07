@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -43,8 +42,6 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 		search := &Search{
 			Query: c.Request.FormValue("c"),
 		}
-
-		fmt.Println(search)
 
 		//Constructing URL
 		url := endpoint + search.Query + apiKey
@@ -187,11 +184,11 @@ func getEverything(endpoint string) gin.HandlerFunc {
 }
 
 func main() {
-
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?q="))
+
 	//handler for static files
-	r.Static("css", "../news_aggregation/css")
+	r.Static("css", "../Golang-News-Aggregation/css")
 
 	r.Run(":8080")
 }
