@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/thinkerou/favicon"
 )
 
 //https://newsapi.org/docs/endpoints/top-headlines
@@ -75,7 +76,7 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 		//First time load to avoid empty API call
 		if search.Query == "" {
 			c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
-				"title":   "News Aggregation | " + search.Country,
+				"title":   "News Aggregation",
 				"country": search.Country,
 				"query":   search.Query,
 			})
@@ -214,7 +215,7 @@ func getEverything(endpoint string) gin.HandlerFunc {
 		//First time load to avoid empty API call
 		if search.Query == "" {
 			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
-				"title": "News Aggregation | " + search.Query,
+				"title": "News Aggregation",
 				"query": search.Query,
 			})
 			//Load footer of HTML
@@ -292,9 +293,8 @@ func main() {
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?pagesize=20&q="))
 
-	//handler for static files
-	r.Static("favicon-16x16.ico", "../Golang-News-Aggregation/")
-	r.Static("js", "../Golang-News-Aggregation/js")
+	//Gin middleware to support favicon.
+	r.Use(favicon.New("./favicon.ico"))
 
 	r.Run(":8080")
 }
