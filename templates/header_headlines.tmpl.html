@@ -7,15 +7,19 @@
         <meta name="author" content="" />
         <title>{{.title}}</title>
         <link rel="icon" type="image/x-icon" href="/favicon-16x16.ico">
-        <link href="/css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body>
         <!-- Header -->
         <header class="py-5 bg-light border-bottom mb-4">
             <div class="container">
                 <div class="text-center my-5">
-                    <h1 class="fw-bolder">Top Headlines for a Country</h1>
-                    <p class="lead mb-0">Select the country you want to get headlines for!</p>
+                    {{if .country}}
+                    <h1 class="fw-bolder">Top Headlines for {{.country}}</h1>
+                    <p class="lead mb-0">Or search for another country below.</p>
+                    {{else}}
+                    <h1 class="fw-bolder">Select the country you want to get headlines for!</h1>
+                    {{end}}
                 </div>
                 <div class = "container text-center">
                     <form action="/topheadlines" method="GET">

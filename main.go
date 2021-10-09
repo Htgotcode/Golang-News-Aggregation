@@ -34,13 +34,60 @@ type NewsResults struct {
 }
 
 type Search struct {
-	Query string
+	Query   string
+	Country string
 }
 
 func getTopHeadlines(endpoint string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		search := &Search{
-			Query: c.Request.FormValue("c"),
+			Query:   c.Request.FormValue("c"),
+			Country: "",
+		}
+
+		switch search.Query {
+		case "za":
+			search.Country = "South Africa"
+		case "ae":
+			search.Country = "United Arab Emirates"
+		case "ar":
+			search.Country = "Argentina"
+		case "at":
+			search.Country = "Austria"
+		case "au":
+			search.Country = "Australia"
+		case "be":
+			search.Country = "Belgium"
+		case "bg":
+			search.Country = "Bulgaria"
+		case "ca":
+			search.Country = "Canada"
+		case "ch":
+			search.Country = "Switzerland"
+		case "cn":
+			search.Country = "China"
+		case "co":
+			search.Country = "Colombia"
+		case "cu":
+			search.Country = "Cuba"
+		case "cz":
+			search.Country = "Czechia"
+		case "de":
+			search.Country = "Germany"
+		case "eg":
+			search.Country = "Egypt"
+		case "fr":
+			search.Country = "France"
+		case "gb":
+			search.Country = "United Kingdom"
+		case "gr":
+			search.Country = "Greece"
+		case "hk":
+			search.Country = "Hong Kong"
+		case "hu":
+			search.Country = "Hungary"
+		default:
+			search.Country = ""
 		}
 
 		//Constructing URL
@@ -86,8 +133,9 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 
 		//Load head & header of HTML
 		c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
-			"title": "News Aggregation/" + search.Query,
-			"query": search.Query,
+			"title":   "News Aggregation/" + search.Query,
+			"country": search.Country,
+			"query":   search.Query,
 		})
 
 		//Load and duplicate article format based on the amount of articles pulled fomr the API
@@ -188,7 +236,7 @@ func main() {
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?q="))
 
 	//handler for static files
-	r.Static("css", "../Golang-News-Aggregation/css")
+	r.Static("favicon-16x16.ico", "../Golang-News-Aggregation/")
 
 	r.Run(":8080")
 }
