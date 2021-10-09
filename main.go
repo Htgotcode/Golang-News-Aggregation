@@ -12,12 +12,12 @@ import (
 	"github.com/thinkerou/favicon"
 )
 
-//https://newsapi.org/docs/endpoints/top-headlines
+//API recieved from https://newsapi.org/
 var apiKey string
 var NewsResults1 = NewsResults{}
 var r = gin.Default()
 
-//JSON response to golang struct
+//Building newsapi.org JSON article response to struct.
 type NewsResults struct {
 	Status       string `json:"status"`
 	TotalResults int    `json:"totalResults"`
@@ -38,12 +38,15 @@ type NewsResults struct {
 	Message string `json:"message"`
 }
 
+//Struct to handle user query input.
 type Search struct {
 	Query   string
 	Country string
 }
 
-//read apikey from text file
+/*Read apikey from text file. Exists to not upload my personal API to github.com
+Snippet credit - https://www.golang101.com/how-tos/how-to-read-text-file-golang/
+*/
 func readAPIKey() {
 	file, err := os.Open("apikey.txt")
 	if err != nil {
@@ -62,9 +65,11 @@ func readAPIKey() {
 	}
 }
 
-//Construct /topheadlines
+//Constructs /topheadlines by accepting a country selection box form and building HTML through templates.
 func getTopHeadlines(endpoint string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+
+		//Assign search to an instance of Search struct from HTML selection box form values.
 		search := &Search{
 			Query:   c.Request.FormValue("c"),
 			Country: "",
@@ -80,10 +85,12 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 				"country": search.Country,
 				"query":   search.Query,
 			})
-			//Load footer of HTML
+
+			//Build footer HTML
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
+
 		} else {
-			//Switch title based on dropbox selection
+			//Switch title based on selection box query.
 			switch search.Query {
 			case "za":
 				search.Country = "South Africa"
@@ -135,14 +142,16 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 				search.Country = ""
 			}
 
-			//Constructing URL
+			/*Construct the URL using the manaully inputted endpoint, user inputted query, and file read API key.
+			The net/http package creates a client and fetches the API's news response body in JSON format.
+			Then we assign it to our NewsResults struct.
+			*/
 			url := endpoint + search.Query + apiKey
 
 			client := http.Client{
-				Timeout: time.Second * 10, // Timeout after 10 seconds
+				Timeout: time.Second * 10,
 			}
 
-			//Fetch api from url provided
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			if err != nil {
 				panic(err)
@@ -153,7 +162,7 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 				panic(err)
 			}
 
-			//Execute res.Body.Close() at the end of the function to avoid memory leak
+			//Execute res.Body.Close() at the end of the function to avoid memory leak.
 			if res.Body != nil {
 				defer res.Body.Close()
 			}
@@ -164,15 +173,14 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 				panic(err)
 			}
 
-			//Unmarshel JSON data from fetched url
 			NewsResults1 := NewsResults{}
 			jsonErr := json.Unmarshal(body, &NewsResults1)
 			if jsonErr != nil {
 				panic(jsonErr)
 			}
 
-			//Build HTML for /topheadlines using mutliple templates
-			//Load head & header of HTML
+			//Call HTML for /topheadlines using mutliple templates
+			//Call head & header of HTML
 			c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
 				"title":   "News Aggregation | " + search.Country,
 				"country": search.Country,
@@ -181,7 +189,7 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 				"code":    NewsResults1.Code,
 				"message": NewsResults1.Message,
 			})
-			//Load and duplicate article format based on the amount of articles pulled fomr the API
+			//Call and duplicate article format based on the amount of articles pulled fomr the API
 			c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
 			for _, article := range NewsResults1.Articles {
 				c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
@@ -194,42 +202,42 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 					"articleUrl":         article.Url,
 				})
 			}
-			//Load footer of HTML
+			//Call footer HTML
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 
 		}
 	}
 }
 
-//Construct /everything
+/*Constructs /everything by accepting a keyword query and building HTML through templates.
+The function is similar to /getTopHeadlines but recieves it query in a different form.
+Comments will not be as verbose.
+*/
 func getEverything(endpoint string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
+		//Read text box from HTML and assign it to search.Query
 		search := &Search{
 			Query: c.Query("q"),
 		}
 
-		//Load HTML templates from folder
 		r.LoadHTMLGlob("templates/*")
 
-		//First time load to avoid empty API call
 		if search.Query == "" {
 			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
 				"title": "News Aggregation",
 				"query": search.Query,
 			})
-			//Load footer of HTML
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
+
 		} else {
 
-			//Constructing URL
 			url := endpoint + search.Query + apiKey
 
 			client := http.Client{
-				Timeout: time.Second * 10, // Timeout after 10 seconds
+				Timeout: time.Second * 10,
 			}
 
-			//Fetch api from url provided
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			if err != nil {
 				panic(err)
@@ -240,26 +248,21 @@ func getEverything(endpoint string) gin.HandlerFunc {
 				panic(err)
 			}
 
-			//Execute res.Body.Close() at the end of the function to avoid memory leak
 			if res.Body != nil {
 				defer res.Body.Close()
 			}
 
-			//Read body requested from url
 			body, err := ioutil.ReadAll(res.Body)
 			if err != nil {
 				panic(err)
 			}
 
-			//Unmarshel JSON data from fetched url
 			NewsResults1 := NewsResults{}
 			jsonErr := json.Unmarshal(body, &NewsResults1)
 			if jsonErr != nil {
 				panic(jsonErr)
 			}
 
-			//Build HTML for /topheadlines using mutliple templates
-			//Load head & header of HTML
 			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
 				"title":   "News Aggregation | " + search.Query,
 				"query":   search.Query,
@@ -267,12 +270,9 @@ func getEverything(endpoint string) gin.HandlerFunc {
 				"code":    NewsResults1.Code,
 				"message": NewsResults1.Message,
 			})
-
-			//Load and duplicate article format based on the amount of articles pulled fomr the API
 			c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
 			for _, article := range NewsResults1.Articles {
 				c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
-					//Send JSON data to HTML
 					"articleSource":      article.Source.Name,
 					"articlePubDate":     article.PublishedAt.Format("January 2, 2006"),
 					"articleTitle":       article.Title,
@@ -281,11 +281,9 @@ func getEverything(endpoint string) gin.HandlerFunc {
 					"articleUrl":         article.Url,
 				})
 			}
-			//Load footer of HTML
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		}
 	}
-
 }
 
 func main() {
