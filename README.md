@@ -10,7 +10,7 @@ portion of the block.
 
 The application you write can cover any topic. It could be terminal based, GUI based, web based, or even mobile. It could be a
 game, a simple tool such as a calculator, or even a business application. The options are endless. If you wish to run your idea
-past the lecturer or get suggestions on how to solve a specic problem you’d like to tackle, feel free to consult with the lecturer.
+past the lecturer or get suggestions on how to solve a specific problem you’d like to tackle, feel free to consult with the lecturer.
 Alongside your application, you should write a document which explains the decisions taken while writing the application and
 how you tackled the task provided. This document is a casual submission, but should demonstrate (from reading) that you
 understand the code that you have written. You should not document the code line-by-line, but you could refer back to the
