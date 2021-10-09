@@ -40,7 +40,8 @@ type Search struct {
 	Country string
 }
 
-func readKey() {
+//read apikey from text file
+func readAPIKey() {
 	file, err := os.Open("apikey.txt")
 	if err != nil {
 		panic(err)
@@ -252,7 +253,7 @@ func getEverything(endpoint string) gin.HandlerFunc {
 }
 
 func main() {
-	readKey()
+	readAPIKey()
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?q="))
 

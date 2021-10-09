@@ -10,6 +10,22 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body>
+        <!-- NavBar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-md-center">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link h4" href="http://localhost:8080/topheadlines">Top Headlines<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link h4" href="http://localhost:8080/everything">Everything</a>
+                </li>
+              </ul>
+              <div class="text-center justify-content-md-center">
+                <span class="navbar-text">
+                  Select "Top Headlines" for all country specific news. Select "Everything" for keyword specific news.
+                </span>
+                </div>
+          </nav>
         <!-- Header -->
         <header class="py-5 bg-light border-bottom mb-4">
             <div class="container">
@@ -18,7 +34,7 @@
                     <h1 class="fw-bolder">Top Headlines for {{.country}}</h1>
                     <p class="lead mb-0">Or search for another country below.</p>
                     {{else}}
-                    <h1 class="fw-bolder">Select the country you want to get headlines for!</h1>
+                    <h1 class="fw-bolder">Select the country you want to get headlines for.</h1>
                     {{end}}
                 </div>
                 <div class = "container text-center">
@@ -51,5 +67,4 @@
                     </div> 
         </header>
     </body>
-    <script type='text/javascript' src='config.js'></script>
 </html>
