@@ -33,6 +33,8 @@ type NewsResults struct {
 		PublishedAt time.Time `json:"publishedAt"`
 		Content     string    `json:"content"`
 	}
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }
 
 type Search struct {
@@ -59,6 +61,7 @@ func readAPIKey() {
 	}
 }
 
+//Construct /topheadlines
 func getTopHeadlines(endpoint string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		search := &Search{
@@ -66,6 +69,7 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 			Country: "",
 		}
 
+		//Switch title based on dropbox selection
 		switch search.Query {
 		case "za":
 			search.Country = "South Africa"
@@ -150,34 +154,41 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 		//Load HTML templates from folder
 		r.LoadHTMLGlob("templates/*")
 
-		//Build HTML for /topheadlines using mutliple templates
-
-		//Load head & header of HTML
-		c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
-			"title":   "News Aggregation/" + search.Query,
-			"country": search.Country,
-			"query":   search.Query,
-		})
-
-		//Load and duplicate article format based on the amount of articles pulled fomr the API
-		c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
-		for _, article := range NewsResults1.Articles {
-			c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
-				//Send JSON data to HTML
-				"articleSource":      article.Source.Name,
-				"articlePubDate":     article.PublishedAt.Format("January 2, 2006"),
-				"articleTitle":       article.Title,
-				"articleDescription": article.Description,
-				"articleImage":       article.UrlToImage,
-				"articleUrl":         article.Url,
+		if NewsResults1.Status == "error" {
+			c.HTML(http.StatusOK, "error.tmpl.html", gin.H{
+				"title":   "News Aggregation | error",
+				"status":  NewsResults1.Status,
+				"code":    NewsResults1.Code,
+				"message": NewsResults1.Message,
 			})
+		} else {
+			//Build HTML for /topheadlines using mutliple templates
+			//Load head & header of HTML
+			c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
+				"title":   "News Aggregation | " + search.Query,
+				"country": search.Country,
+				"query":   search.Query,
+			})
+			//Load and duplicate article format based on the amount of articles pulled fomr the API
+			c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
+			for _, article := range NewsResults1.Articles {
+				c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
+					//Send JSON data to HTML
+					"articleSource":      article.Source.Name,
+					"articlePubDate":     article.PublishedAt.Format("January 2, 2006"),
+					"articleTitle":       article.Title,
+					"articleDescription": article.Description,
+					"articleImage":       article.UrlToImage,
+					"articleUrl":         article.Url,
+				})
+			}
+			//Load footer of HTML
+			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		}
-
-		//Load footer of HTML
-		c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 	}
 }
 
+//Construct /everything
 func getEverything(endpoint string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
@@ -224,31 +235,39 @@ func getEverything(endpoint string) gin.HandlerFunc {
 		//Load HTML templates from folder
 		r.LoadHTMLGlob("templates/*")
 
-		//Build HTML for /topheadlines using mutliple templates
-
-		//Load head & header of HTML
-		c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
-			"title": "News Aggregation/" + search.Query,
-			//Call function again to refresh results if server isn't restarted
-			"refresh": getEverything,
-			"query":   search.Query,
-		})
-
-		//Load and duplicate article format based on the amount of articles pulled fomr the API
-		c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
-		for _, article := range NewsResults1.Articles {
-			c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
-				//Send JSON data to HTML
-				"articleSource":      article.Source.Name,
-				"articlePubDate":     article.PublishedAt.Format("January 2, 2006"),
-				"articleTitle":       article.Title,
-				"articleDescription": article.Description,
-				"articleImage":       article.UrlToImage,
-				"articleUrl":         article.Url,
+		if NewsResults1.Status == "error" {
+			c.HTML(http.StatusOK, "error.tmpl.html", gin.H{
+				"title":   "News Aggregation | error",
+				"status":  NewsResults1.Status,
+				"code":    NewsResults1.Code,
+				"message": NewsResults1.Message,
 			})
+		} else {
+			//Build HTML for /topheadlines using mutliple templates
+			//Load head & header of HTML
+			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
+				"title": "News Aggregation | " + search.Query,
+				//Call function again to refresh results if server isn't restarted
+				"refresh": getEverything,
+				"query":   search.Query,
+			})
+
+			//Load and duplicate article format based on the amount of articles pulled fomr the API
+			c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
+			for _, article := range NewsResults1.Articles {
+				c.HTML(http.StatusOK, "articles.tmpl.html", gin.H{
+					//Send JSON data to HTML
+					"articleSource":      article.Source.Name,
+					"articlePubDate":     article.PublishedAt.Format("January 2, 2006"),
+					"articleTitle":       article.Title,
+					"articleDescription": article.Description,
+					"articleImage":       article.UrlToImage,
+					"articleUrl":         article.Url,
+				})
+			}
+			//Load footer of HTML
+			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		}
-		//Load footer of HTML
-		c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 	}
 }
 
