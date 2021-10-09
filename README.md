@@ -1,4 +1,5 @@
 # Golang-News-Aggregation
+Create "apikey.txt" with your API KEY from https://newsapi.org/ in root.
 
 ## Specification
 
