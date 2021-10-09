@@ -1,16 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 //https://newsapi.org/docs/endpoints/top-headlines
-var apiKey = "&apiKey=6996b0514b4449bfbb365846da95b15f"
+var apiKey string
 var NewsResults1 = NewsResults{}
 var r = gin.Default()
 
@@ -36,6 +38,24 @@ type NewsResults struct {
 type Search struct {
 	Query   string
 	Country string
+}
+
+func readKey() {
+	file, err := os.Open("apikey.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	scanner.Scan()
+	apiKey = scanner.Text()
+
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
 }
 
 func getTopHeadlines(endpoint string) gin.HandlerFunc {
@@ -232,11 +252,13 @@ func getEverything(endpoint string) gin.HandlerFunc {
 }
 
 func main() {
+	readKey()
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?q="))
 
 	//handler for static files
 	r.Static("favicon-16x16.ico", "../Golang-News-Aggregation/")
+	r.Static("js", "../Golang-News-Aggregation/js")
 
 	r.Run(":8080")
 }
