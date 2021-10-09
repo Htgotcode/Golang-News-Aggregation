@@ -69,105 +69,116 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 			Country: "",
 		}
 
-		//Switch title based on dropbox selection
-		switch search.Query {
-		case "za":
-			search.Country = "South Africa"
-		case "ae":
-			search.Country = "United Arab Emirates"
-		case "ar":
-			search.Country = "Argentina"
-		case "at":
-			search.Country = "Austria"
-		case "au":
-			search.Country = "Australia"
-		case "be":
-			search.Country = "Belgium"
-		case "bg":
-			search.Country = "Bulgaria"
-		case "ca":
-			search.Country = "Canada"
-		case "ch":
-			search.Country = "Switzerland"
-		case "cn":
-			search.Country = "China"
-		case "co":
-			search.Country = "Colombia"
-		case "cu":
-			search.Country = "Cuba"
-		case "cz":
-			search.Country = "Czechia"
-		case "de":
-			search.Country = "Germany"
-		case "eg":
-			search.Country = "Egypt"
-		case "fr":
-			search.Country = "France"
-		case "gb":
-			search.Country = "United Kingdom"
-		case "gr":
-			search.Country = "Greece"
-		case "hk":
-			search.Country = "Hong Kong"
-		case "hu":
-			search.Country = "Hungary"
-		default:
-			search.Country = ""
-		}
-
-		//Constructing URL
-		url := endpoint + search.Query + apiKey
-
-		client := http.Client{
-			Timeout: time.Second * 10, // Timeout after 10 seconds
-		}
-
-		//Fetch api from url provided
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			panic(err)
-		}
-
-		res, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		//Execute res.Body.Close() at the end of the function to avoid memory leak
-		if res.Body != nil {
-			defer res.Body.Close()
-		}
-
-		//Read body requested from url
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			panic(err)
-		}
-
-		//Unmarshel JSON data from fetched url
-		NewsResults1 := NewsResults{}
-		jsonErr := json.Unmarshal(body, &NewsResults1)
-		if jsonErr != nil {
-			panic(jsonErr)
-		}
-
 		//Load HTML templates from folder
 		r.LoadHTMLGlob("templates/*")
 
-		if NewsResults1.Status == "error" {
-			c.HTML(http.StatusOK, "error.tmpl.html", gin.H{
-				"title":   "News Aggregation | error",
-				"status":  NewsResults1.Status,
-				"code":    NewsResults1.Code,
-				"message": NewsResults1.Message,
+		//First time load to avoid empty API call
+		if search.Query == "" {
+			c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
+				"title":   "News Aggregation | " + search.Country,
+				"country": search.Country,
+				"query":   search.Query,
 			})
+			//Load footer of HTML
+			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		} else {
+			//Switch title based on dropbox selection
+			switch search.Query {
+			case "za":
+				search.Country = "South Africa"
+			case "ae":
+				search.Country = "United Arab Emirates"
+			case "ar":
+				search.Country = "Argentina"
+			case "at":
+				search.Country = "Austria"
+			case "au":
+				search.Country = "Australia"
+			case "be":
+				search.Country = "Belgium"
+			case "bg":
+				search.Country = "Bulgaria"
+			case "ca":
+				search.Country = "Canada"
+			case "ch":
+				search.Country = "Switzerland"
+			case "cn":
+				search.Country = "China"
+			case "co":
+				search.Country = "Colombia"
+			case "cu":
+				search.Country = "Cuba"
+			case "cz":
+				search.Country = "Czechia"
+			case "de":
+				search.Country = "Germany"
+			case "eg":
+				search.Country = "Egypt"
+			case "fr":
+				search.Country = "France"
+			case "gb":
+				search.Country = "United Kingdom"
+			case "gr":
+				search.Country = "Greece"
+			case "hk":
+				search.Country = "Hong Kong"
+			case "hu":
+				search.Country = "Hungary"
+			case "id":
+				search.Country = "Indonesia"
+			case "ru":
+				search.Country = "Russian Federation"
+			case "us":
+				search.Country = "United States of America"
+			default:
+				search.Country = ""
+			}
+
+			//Constructing URL
+			url := endpoint + search.Query + apiKey
+
+			client := http.Client{
+				Timeout: time.Second * 10, // Timeout after 10 seconds
+			}
+
+			//Fetch api from url provided
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				panic(err)
+			}
+
+			res, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+
+			//Execute res.Body.Close() at the end of the function to avoid memory leak
+			if res.Body != nil {
+				defer res.Body.Close()
+			}
+
+			//Read body requested from url
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			//Unmarshel JSON data from fetched url
+			NewsResults1 := NewsResults{}
+			jsonErr := json.Unmarshal(body, &NewsResults1)
+			if jsonErr != nil {
+				panic(jsonErr)
+			}
+
 			//Build HTML for /topheadlines using mutliple templates
 			//Load head & header of HTML
 			c.HTML(http.StatusOK, "header_headlines.tmpl.html", gin.H{
-				"title":   "News Aggregation | " + search.Query,
+				"title":   "News Aggregation | " + search.Country,
 				"country": search.Country,
 				"query":   search.Query,
+				"status":  NewsResults1.Status,
+				"code":    NewsResults1.Code,
+				"message": NewsResults1.Message,
 			})
 			//Load and duplicate article format based on the amount of articles pulled fomr the API
 			c.HTML(http.StatusOK, "articles_container.tmpl.html", gin.H{})
@@ -184,6 +195,7 @@ func getTopHeadlines(endpoint string) gin.HandlerFunc {
 			}
 			//Load footer of HTML
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
+
 		}
 	}
 }
@@ -196,60 +208,63 @@ func getEverything(endpoint string) gin.HandlerFunc {
 			Query: c.Query("q"),
 		}
 
-		//Constructing URL
-		url := endpoint + search.Query + apiKey
-
-		client := http.Client{
-			Timeout: time.Second * 10, // Timeout after 10 seconds
-		}
-
-		//Fetch api from url provided
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		if err != nil {
-			panic(err)
-		}
-
-		res, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		//Execute res.Body.Close() at the end of the function to avoid memory leak
-		if res.Body != nil {
-			defer res.Body.Close()
-		}
-
-		//Read body requested from url
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			panic(err)
-		}
-
-		//Unmarshel JSON data from fetched url
-		NewsResults1 := NewsResults{}
-		jsonErr := json.Unmarshal(body, &NewsResults1)
-		if jsonErr != nil {
-			panic(jsonErr)
-		}
-
 		//Load HTML templates from folder
 		r.LoadHTMLGlob("templates/*")
 
-		if NewsResults1.Status == "error" {
-			c.HTML(http.StatusOK, "error.tmpl.html", gin.H{
-				"title":   "News Aggregation | error",
-				"status":  NewsResults1.Status,
-				"code":    NewsResults1.Code,
-				"message": NewsResults1.Message,
+		//First time load to avoid empty API call
+		if search.Query == "" {
+			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
+				"title": "News Aggregation | " + search.Query,
+				"query": search.Query,
 			})
+			//Load footer of HTML
+			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		} else {
+
+			//Constructing URL
+			url := endpoint + search.Query + apiKey
+
+			client := http.Client{
+				Timeout: time.Second * 10, // Timeout after 10 seconds
+			}
+
+			//Fetch api from url provided
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				panic(err)
+			}
+
+			res, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+
+			//Execute res.Body.Close() at the end of the function to avoid memory leak
+			if res.Body != nil {
+				defer res.Body.Close()
+			}
+
+			//Read body requested from url
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			//Unmarshel JSON data from fetched url
+			NewsResults1 := NewsResults{}
+			jsonErr := json.Unmarshal(body, &NewsResults1)
+			if jsonErr != nil {
+				panic(jsonErr)
+			}
+
 			//Build HTML for /topheadlines using mutliple templates
 			//Load head & header of HTML
 			c.HTML(http.StatusOK, "header_everything.tmpl.html", gin.H{
-				"title": "News Aggregation | " + search.Query,
-				//Call function again to refresh results if server isn't restarted
-				"refresh": getEverything,
+				"title":   "News Aggregation | " + search.Query,
 				"query":   search.Query,
+				"status":  NewsResults1.Status,
+				"code":    NewsResults1.Code,
+				"message": NewsResults1.Message,
 			})
 
 			//Load and duplicate article format based on the amount of articles pulled fomr the API
@@ -269,12 +284,13 @@ func getEverything(endpoint string) gin.HandlerFunc {
 			c.HTML(http.StatusOK, "footer.tmpl.html", gin.H{})
 		}
 	}
+
 }
 
 func main() {
 	readAPIKey()
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
-	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?q="))
+	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?pagesize=20&q="))
 
 	//handler for static files
 	r.Static("favicon-16x16.ico", "../Golang-News-Aggregation/")

@@ -8,6 +8,19 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body>
+      {{if .code}}
+      <div class="container">
+        <h1 class="h3 text-muted">
+          {{.status}}
+        </h1>
+        <h2 class="h2 text-muted">
+          {{.code}}
+        </h2>
+        <h2 class="h1">
+          {{.message}}
+        </h2>
+    </div> 
+      {{else}}
         <!-- NavBar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-md-center">
             <ul class="navbar-nav mr-auto">
@@ -48,5 +61,6 @@
             </form>
             </div> 
         </header>
+        {{end}}
     </body>
 </html>
