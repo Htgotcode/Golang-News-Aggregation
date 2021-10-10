@@ -286,8 +286,14 @@ func getEverything(endpoint string) gin.HandlerFunc {
 	}
 }
 
+//Redirect index to /topheadlines.
+func indexRedirect(c *gin.Context) {
+	c.Redirect(http.StatusPermanentRedirect, "/topheadlines")
+}
+
 func main() {
 	readAPIKey()
+	r.GET("/", indexRedirect)
 	r.GET("/topheadlines", getTopHeadlines("https://newsapi.org/v2/top-headlines?country="))
 	r.GET("/everything", getEverything("https://newsapi.org/v2/everything?pagesize=20&q="))
 
